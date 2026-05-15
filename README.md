@@ -31,7 +31,7 @@ rsync_snapshots [-options]
 - `--version`: Print version and exit
 - `--verbose`: Be more verbose
 - `--quiet`: Be quiet (about errors)
-- `--no-execute`: Don't actually copy files, just pretend (i.e. a dry run mode)
+- `-n`, `--dry-run`: Don't actually copy files, just pretend (i.e. a dry run mode)
 - `--cron`: Send output to log file instead of stdout
 - `--conf <conf>`: Read config from <conf>. Defaults to `/usr/local/etc/rsync_snapshots.conf`
 - `--max-delete <n>`: Delete at most n old snapshots
@@ -76,9 +76,59 @@ exclude_from=<file>: Exclude files matching patterns in <file>
 rsync_opts=<opts>: Override default rsync options (default is "-xaSH --numeric-ids --delete")
 ```
 
+## Testing
+
+Run the local tests (no remote hosts required):
+
+```bash
+make test-local
+```
+
+### Running the Full Test Suite
+
+The full test suite includes remote tests that SSH into two hosts. To run them:
+
+1. Edit `test/environs.sh` and set `REM_SRC` and `REM_DST` to your test hosts:
+
+```bash
+REM_SRC="user@source-host"
+REM_DST="user@dest-host"
+```
+
+2. Ensure passwordless SSH access works from your machine to both hosts:
+
+```bash
+ssh-copy-id user@source-host
+ssh-copy-id user@dest-host
+```
+
+3. The tests use `/tmp/rsnap_source` and `/tmp/rsnap_dest` on the remote hosts - make sure those paths are writable.
+
+4. Run the full suite:
+
+```bash
+make test
+```
+
+The three remote test scenarios covered are: remote destination, remote source, and both source and destination remote.
+
 ## Installation
 
-1. Save the script as `rsync_snapshots` somewhere in your PATH
+Install to `/usr/local/bin` (default):
+
+```bash
+make install
+```
+
+To install to a different location:
+
+```bash
+make install INSTALL_DIR=/your/preferred/bin
+```
+
+Or manually:
+
+1. Copy `rsync_snapshots` somewhere in your PATH
 2. Make it executable: `chmod +x rsync_snapshots`
 3. Create a configuration file (see above)
 4. Call the script from a cronjob (see below)
